@@ -13,7 +13,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Setup Python
-          uses: actions/setup-python
+          uses: actions/setup-python@v6
         - uses: actions/checkout@v3
         - name: Run tests
-          run:  python3 tests.py 
+          run:  python tests.py 
