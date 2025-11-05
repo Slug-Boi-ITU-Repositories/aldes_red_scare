@@ -10,6 +10,9 @@ class Node:
 
     def update_edge(self, to, weight):
         self.edges[to] += weight
+    
+    def __lt__(self, other):
+        return self.name.__lt__(other.name)
 
 class Graph:
     def __init__(self, n, r, s, t):

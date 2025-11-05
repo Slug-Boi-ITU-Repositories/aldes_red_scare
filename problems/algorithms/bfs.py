@@ -2,12 +2,12 @@ from graph_utils.graphs import *
 from queue import Queue
 
 # I rate this +1
-def bfs(G : Graph, s : Node, t : Node, predicate = (lambda nfrom, nto : True)):
+def bfs(s : Node, t : Node, predicate = (lambda nfrom, nto : True)):
     queue : Queue[Node] = Queue()
     queue.put(s)
     seen = set()
     edge_from = {}
-    while queue.not_empty:
+    while not queue.empty:
         n = queue.get()
         seen.add(n)
         for node_to in n.edges.keys():
