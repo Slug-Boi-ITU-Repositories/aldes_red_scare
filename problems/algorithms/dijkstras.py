@@ -11,7 +11,7 @@ def djikstra(s : Node, t : Node):
     edge_from = {}
     dist_to = defaultdict(lambda: math.inf)
     dist_to[s] = 0
-    while not pq.empty:
+    while not pq.empty():
         n = pq.get()[1]
         if n == t:
             return dist_to[t] if not t.is_red else dist_to[t] - 1
