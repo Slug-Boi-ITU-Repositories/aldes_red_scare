@@ -14,6 +14,6 @@ jobs:
       steps:
         - name: Setup Python
           uses: actions/setup-python@v6
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v5
         - name: Run tests
           run:  python tests.py 
