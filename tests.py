@@ -8,7 +8,8 @@ from time import time
 solutions = [
     "ProblemAlternate",
     "ProblemFew",
-    "ProblemNone"
+    "ProblemNone",
+    "ProblemMany"
 ]
 
 accuracies = []
@@ -30,9 +31,20 @@ def run_tests(tests = os.listdir("./data")):
             if args.debug:
                 start_time = current_milli_time()
                 print(f"[DEBUG]: running '{test}' for '{problem}'")
-            process = subprocess.Popen(f"cd problems && python3 -m {problem}.solution < ../data/{test}", shell=True, stdout=subprocess.PIPE, text=True)
-            process.wait()
-            results[problem] = process.stdout.read().strip()
+            process = subprocess.Popen(f"cd problems && python3 -m {problem}.solution < ../data/{test}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            try:
+                process.wait(timeout=args.timeout)
+                if process.returncode != 0:
+                    if "RecursionError" in process.stderr.read():
+                        results[problem] = "REC LIMIT REACHED"
+                    else:
+                        results[problem] = "FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK"
+                else:
+                    results[problem] = process.stdout.read().strip()
+                
+            except subprocess.TimeoutExpired:
+                results[problem] = "TIMEOUT"
+
             if args.debug:
                 end_time = current_milli_time()
                 print(f"[DEBUG]: '{test}' finished for {problem} with result '{results[problem]}' | finished in {end_time-start_time} ms")
@@ -110,6 +122,14 @@ p.add_argument(
     help="Runs a single test on a list of file"
 )
 
+p.add_argument(
+    "-t",
+    "--timeout",
+    type=int,
+    default=1,
+    help="Sets the timeout timer on problems",
+)
+
 parser.add_argument(
     "-m",
     "--markdown",
@@ -130,6 +150,7 @@ parser.add_argument(
     action="store_true",
     help="Prints the output as a json object"
 )
+
 
 args = p.parse_args()
 
