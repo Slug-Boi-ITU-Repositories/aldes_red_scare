@@ -1,4 +1,5 @@
 import asyncio
+import signal
 import subprocess
 import os
 import argparse
@@ -9,7 +10,8 @@ solutions = [
     "ProblemAlternate",
     "ProblemFew",
     "ProblemNone",
-    "ProblemMany"
+    "ProblemMany",
+    "ProblemSome"
 ]
 
 accuracies = []
@@ -31,19 +33,25 @@ def run_tests(tests = os.listdir("./data")):
             if args.debug:
                 start_time = current_milli_time()
                 print(f"[DEBUG]: running '{test}' for '{problem}'")
-            process = subprocess.Popen(f"cd problems && python3 -m {problem}.solution < ../data/{test}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(f"cd problems && python3 -m {problem}.solution < ../data/{test}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
             try:
-                process.wait(timeout=args.timeout)
+                stdout, stderr = process.communicate(timeout=args.timeout)
                 if process.returncode != 0:
-                    if "RecursionError" in process.stderr.read():
+                    if "RecursionError" in stderr:
                         results[problem] = "REC LIMIT REACHED"
                     else:
                         results[problem] = "FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK"
                 else:
-                    results[problem] = process.stdout.read().strip()
+                    results[problem] = stdout.strip()
                 
             except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.kill()
+                stdout, stderr = process.communicate()
                 results[problem] = "TIMEOUT"
+            
+
+            process = None
 
             if args.debug:
                 end_time = current_milli_time()
