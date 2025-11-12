@@ -61,8 +61,8 @@ def print_results_markdown(results_by_test):
         row = f"| {test} | " + " | ".join(outputs.get(problem, "") for problem in solutions) + " |"
         output.append(row)
 
-    if args.output:
-        with open(args.output, "w") as f:
+    if args.markdown != "stdout":
+        with open(args.markdown, "w") as f:
             f.write("\n".join(output))
     else:
         print("\n".join(output))
@@ -92,16 +92,16 @@ def print_results_latex(results_by_test):
         "\\end{table}"
     ])
 
-    if args.output:
-        with open(args.output, "w") as f:
+    if args.latex != "stdout":
+        with open(args.latex, "w") as f:
             f.write("\n".join(output))
     else:
         print("\n".join(output))
 
 def print_results_json(results_by_test):
     output = json.dumps(results_by_test)
-    if args.output:
-        with open(args.output, "w") as f:
+    if args.json != "stdout":
+        with open(args.json, "w") as f:
             f.write(output)
     else:
         print(output)
@@ -120,12 +120,9 @@ def parse_file_list(value):
     else:
         return [value]
 
-
 p = argparse.ArgumentParser(
     description="Testing program for the red scare algorithm solutions"
 )
-
-parser = p.add_mutually_exclusive_group()
 
 p.add_argument(
     "-d",
@@ -151,31 +148,26 @@ p.add_argument(
 )
 
 p.add_argument(
-    "-o",
-    "--output",
-    type=str,
-    default="",
-    help="Output to file instead of printing to terminal"
-)
-
-parser.add_argument(
     "-m",
     "--markdown",
-    action="store_true",
+    nargs="?",
+    const='stdout',
     help="Prints the output as markdown"
 )
 
-parser.add_argument(
+p.add_argument(
     "-l",
     "--latex",
-    action="store_true",
+    nargs='?',
+    const='stdout',
     help="Prints the output as a latex table"
 )
 
-parser.add_argument(
+p.add_argument(
     "-j",
     "--json",
-    action="store_true",
+    nargs='?',
+    const="stdout",
     help="Prints the output as a json object"
 )
 
@@ -185,6 +177,7 @@ if args.file:
     run_tests(args.file)
 else:
     run_tests()
+
 if args.markdown:
     print_results_markdown(all)
 
@@ -193,4 +186,3 @@ if args.latex:
 
 if args.json:
     print_results_json(all)
-
