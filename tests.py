@@ -3,6 +3,7 @@ import subprocess
 import os
 import argparse
 import json
+from time import time
 
 solutions = [
     "ProblemAlternate",
@@ -14,24 +15,33 @@ accuracies = []
 accuracies = []
 all = {}
 
-def run_tests():
-    tests = sorted(os.listdir("./data"))
-    tests.remove("README.md") 
+
+def current_milli_time():
+    return round(time() * 1000)
+
+def run_tests(tests = os.listdir("./data")):
+    tests = sorted(tests)
+    if "README.md" in tests:
+        tests.remove("README.md") 
 
     for test in tests:
         results = {}
         for problem in solutions:
+            if args.debug:
+                start_time = current_milli_time()
+                print(f"[DEBUG]: running '{test}' for '{problem}'")
             process = subprocess.Popen(f"cd problems && python3 -m {problem}.solution < ../data/{test}", shell=True, stdout=subprocess.PIPE, text=True)
             process.wait()
             results[problem] = process.stdout.read().strip()
+            if args.debug:
+                end_time = current_milli_time()
+                print(f"[DEBUG]: '{test}' finished for {problem} with result '{results[problem]}' | finished in {end_time-start_time} ms")
         all[test] = results
 
 
-run_tests()
-
 def print_results_markdown(results_by_test):
     header = "| Test File | " + " | ".join(solutions) + " |"
-    separator = "|------------|" + "|".join(["------------|" for _ in solutions])
+    separator = "|:------------|:" + ":|:".join(["------------" for _ in solutions]) + ":|"
 
     print(header)
     print(separator)
@@ -62,7 +72,21 @@ def print_results_latex(results_by_test):
     print("\\end{table}")
 
 def print_results_json(results_by_test):
-    print(json.dumps(results_by_test)))
+    print(json.dumps(results_by_test))
+
+
+def parse_file_list(value):
+    """Parse file input that can be either a string or list format"""
+    if not value:
+        return []
+    
+    if value.startswith('[') and value.endswith(']'):
+        content = value[1:-1].strip()
+        if not content:
+            return []
+        return [item.strip() for item in content.split(',')]
+    else:
+        return [value]
 
 
 p = argparse.ArgumentParser(
@@ -70,6 +94,21 @@ p = argparse.ArgumentParser(
 )
 
 parser = p.add_mutually_exclusive_group()
+
+p.add_argument(
+    "-d",
+    "--debug",
+    action="store_true",
+    help="Prints debug information"
+)
+
+p.add_argument(
+    "-f",
+    "--file",
+    type=parse_file_list,
+    default=[],
+    help="Runs a single test on a list of file"
+)
 
 parser.add_argument(
     "-m",
@@ -92,9 +131,18 @@ parser.add_argument(
     help="Prints the output as a json object"
 )
 
-args = parser.parse_args()
+args = p.parse_args()
 
+if args.file:
+    run_tests(args.file)
+else:
+    run_tests()
 if args.markdown:
-    print("markdown")
+    print_results_markdown(all)
 
-# print_results_markdown(all)
+if args.latex: 
+    print_results_latex(all)
+
+if args.json:
+    print("Not implemented yet. Get fucked idiot")
+
