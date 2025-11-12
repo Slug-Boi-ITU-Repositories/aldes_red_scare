@@ -22,6 +22,6 @@ jobs:
           with:
             name: markdown && latex
             path: |
-              *.md
-              *.tex
+              output.md
+              output.tex
             retention-days: 5
