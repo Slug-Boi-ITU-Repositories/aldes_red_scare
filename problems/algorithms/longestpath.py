@@ -22,4 +22,3 @@ def longest_path(start : Node, end : Node):
 
     
     
-    
