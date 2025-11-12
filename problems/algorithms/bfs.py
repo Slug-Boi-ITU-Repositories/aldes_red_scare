@@ -16,7 +16,7 @@ def bfs(s : Node, t : Node, predicate = (lambda nfrom, nto : True)):
                 return edge_from
             #print(n.name, node_to.name, "-", predicate(n, node_to))
             if node_to not in seen and predicate(n, node_to):
-                seen.add(n)
+                seen.add(node_to)
                 edge_from[node_to] = n
                 queue.put(node_to)
     return None
