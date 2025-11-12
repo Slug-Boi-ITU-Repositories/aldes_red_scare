@@ -63,36 +63,56 @@ def print_results_markdown(results_by_test):
     header = "| Test File | " + " | ".join(solutions) + " |"
     separator = "|:------------|:" + ":|:".join(["------------" for _ in solutions]) + ":|"
 
-    print(header)
-    print(separator)
+    output = [header, separator]
 
     for test, outputs in results_by_test.items():
         row = f"| {test} | " + " | ".join(outputs.get(problem, "") for problem in solutions) + " |"
-        print(row)
+        output.append(row)
+
+    if args.markdown != "stdout":
+        with open(args.markdown, "w") as f:
+            f.write("\n".join(output))
+    else:
+        print("\n".join(output))
 
 def print_results_latex(results_by_test):
     col_format = "|l|" + "c|" * len(solutions)
-    print("\\begin{table}[h!]")
-    print("\\centering")
-    print(f"\\begin{{tabular}}{{{col_format}}}")
-    print("\\hline")
+
+    output = [
+        "\\begin{table}[h!]", 
+        "\\centering", 
+        f"\\begin{{tabular}}{{{col_format}}}", 
+        "\\hline"
+    ]
 
     header = "Test File & " + " & ".join(solutions) + " \\\\"
-    print(header)
-    print("\\hline")
+    output.extend([header, "\\hline"])
 
     for test, outputs in results_by_test.items():
         row_values = " & ".join(outputs.get(problem, "") for problem in solutions)
-        print(f"{test} & {row_values} \\\\")
-    print("\\hline")
+        output.append(f"{test} & {row_values} \\\\")
+    output.append("\\hline")
 
-    print("\\end{tabular}")
-    print("\\caption{Test results for all problem solutions}")
-    print("\\label{tab:test_results}")
-    print("\\end{table}")
+    output.extend([
+        "\\end{tabular}", 
+        "\\caption{Test results for all problem solutions}", 
+        "\\label{tab:test_results}", 
+        "\\end{table}"
+    ])
+
+    if args.latex != "stdout":
+        with open(args.latex, "w") as f:
+            f.write("\n".join(output))
+    else:
+        print("\n".join(output))
 
 def print_results_json(results_by_test):
-    print(json.dumps(results_by_test))
+    output = json.dumps(results_by_test)
+    if args.json != "stdout":
+        with open(args.json, "w") as f:
+            f.write(output)
+    else:
+        print(output)
 
 
 def parse_file_list(value):
@@ -108,12 +128,9 @@ def parse_file_list(value):
     else:
         return [value]
 
-
 p = argparse.ArgumentParser(
     description="Testing program for the red scare algorithm solutions"
 )
-
-parser = p.add_mutually_exclusive_group()
 
 p.add_argument(
     "-d",
@@ -138,27 +155,29 @@ p.add_argument(
     help="Sets the timeout timer on problems",
 )
 
-parser.add_argument(
+p.add_argument(
     "-m",
     "--markdown",
-    action="store_true",
+    nargs="?",
+    const='stdout',
     help="Prints the output as markdown"
 )
 
-parser.add_argument(
+p.add_argument(
     "-l",
     "--latex",
-    action="store_true",
+    nargs='?',
+    const='stdout',
     help="Prints the output as a latex table"
 )
 
-parser.add_argument(
+p.add_argument(
     "-j",
     "--json",
-    action="store_true",
+    nargs='?',
+    const="stdout",
     help="Prints the output as a json object"
 )
-
 
 args = p.parse_args()
 
@@ -166,6 +185,7 @@ if args.file:
     run_tests(args.file)
 else:
     run_tests()
+
 if args.markdown:
     print_results_markdown(all)
 
@@ -173,5 +193,4 @@ if args.latex:
     print_results_latex(all)
 
 if args.json:
-    print("Not implemented yet. Get fucked idiot")
-
+    print_results_json(all)
