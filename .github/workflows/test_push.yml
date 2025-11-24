@@ -14,7 +14,7 @@ jobs:
       steps:
         - name: Setup Python
           uses: actions/setup-python@v6
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
         - name: Run tests
           run: python tests.py -m output.md -l output.tex -t 10
         - name: Archive markdown && latex tables
