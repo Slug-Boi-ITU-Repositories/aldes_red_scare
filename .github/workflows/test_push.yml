@@ -18,7 +18,7 @@ jobs:
         - name: Run tests
           run: python tests.py -m output.md -l output.tex -t 10
         - name: Archive markdown && latex tables
-          uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@v5
           with:
             name: markdown && latex
             path: |
