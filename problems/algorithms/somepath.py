@@ -1,6 +1,8 @@
 from graph_utils.graphs import *
 import sys
 
+# Algotithm reaches at maximum a reqursion depth of n
+# Recursion limit is set to 80000 to largest data sample has 80000 vertices
 sys.setrecursionlimit(80000)
 
 def some_path(start : Node, end : Node):
